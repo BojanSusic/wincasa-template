@@ -1,10 +1,10 @@
 /*
 Theme Name: Wincasa template
 Theme URI: https://www.singularity.is
-Author: Singularity Solution - Djordje
+Author: Singularity Solution - Djordje, Bojan
 Author URI: https://www.singularity.is
 Description:
-Version: 1.1
+Version: 1.2
 GitHub Theme URI: BojanSusic/wincasa-template
 GitHub Theme URI: https://github.com/BojanSusic/wincasa-template
 
@@ -1319,7 +1319,7 @@ a {
 }
 
 .red-background {
-    /*     background: var(--flats-cards-background) */
+    background: var(--flats-cards-background) !important;
 }
 
 .black-text {
@@ -1460,7 +1460,7 @@ a {
 
 .horisontal-line {
     width: var(--accordion-circle-line);
-    height: 5px;
+    height: 3px;
     background: white;
     position: absolute;
     left: 0;
@@ -1488,7 +1488,7 @@ a {
 }
 
 .collapsed .vertical-line {
-    width: 5px;
+    width: 3px;
 }
 
 .gallery-page-content {

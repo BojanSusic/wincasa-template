@@ -21,35 +21,33 @@ function removeData()
 
 }
 add_action('cache_page', 'cachePage');
+add_action('acf/save_post', 'cachePage');
 function cachePage(){
-	if(file_exists('cached-wohnungen.html')){
-		unlink('cached-wohnungen.html');
-	}
-	$curl = curl_init();
-
-	curl_setopt_array($curl, array(
-	  CURLOPT_URL => get_site_url().'/wohnungen/',
-	  CURLOPT_RETURNTRANSFER => true,
-	  CURLOPT_ENCODING => '',
-	  CURLOPT_MAXREDIRS => 10,
-	  CURLOPT_TIMEOUT => 0,
-	  CURLOPT_FOLLOWLOCATION => true,
-	  CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-	  CURLOPT_CUSTOMREQUEST => 'GET',
-	  CURLOPT_POSTFIELDS =>'{
+    if(file_exists($_SERVER['DOCUMENT_ROOT'].'/cached-wohnungen.html')){
+        unlink($_SERVER['DOCUMENT_ROOT'].'/cached-wohnungen.html');
+    }
+    $curl = curl_init();
+    curl_setopt_array($curl, array(
+        CURLOPT_URL => get_site_url().'/wohnungen/',
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_ENCODING => '',
+        CURLOPT_MAXREDIRS => 10,
+        CURLOPT_TIMEOUT => 0,
+        CURLOPT_FOLLOWLOCATION => true,
+        CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+        CURLOPT_CUSTOMREQUEST => 'GET',
+        CURLOPT_POSTFIELDS =>'{
 		"device": "desktop"
 	}',
-	  CURLOPT_HTTPHEADER => array(
-		'Authorization: Bearer bb6d5a81b31fd1b5daa22a345f9c11f07280a29e',
-		'Content-Type: application/json'
-	  ),
-	));
+        CURLOPT_HTTPHEADER => array(
+            'Authorization: Bearer bb6d5a81b31fd1b5daa22a345f9c11f07280a29e',
+            'Content-Type: application/json'
+        ),
+    ));
+    $response = curl_exec($curl);
+    curl_close($curl);
+    do_action( 'litespeed_purge_all' );
 
-	$response = curl_exec($curl);
-
-	curl_close($curl);
-   do_action( 'litespeed_purge_all' );
-	
 }
 add_action('add_links','addLinks');
 function addLinks()

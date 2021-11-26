@@ -76,7 +76,7 @@
                 </div>
 				<div class="d-flex justify-content-center justify-content-lg-start">
 					 <img class="footer-map-image" src="<?php bloginfo('template_directory'); ?>/images/ic-map.svg">
-                    <p>In der Würe 1-3 <br> 9552 Bronschhofen</p>
+                    <?= get_field('footer-location','options') ?>
 				</div>
 				</div>
                 
