@@ -540,7 +540,6 @@ function generate_wohnungen_all_table()
 									</div>
 									<div class="card-heading"><?php echo $street['name'] ?></div>
 								</div>
-                                <div class="fas collapse-icon-plus"></div>
                             </button>
                         </h2>
                     </div>
