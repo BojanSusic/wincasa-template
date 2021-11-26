@@ -16,7 +16,7 @@
 			    <div class="gallery gallery-block clearfix row">
 			    <?php foreach( $images as $image ): ?> 
 			        
-			        <a class="col-4 px-0" href="<?php echo $image['sizes']['gallery']; ?>" title="">
+			        <a class="col-4 p-3" href="<?php echo $image['sizes']['gallery']; ?>" title="">
 			            <img src="<?php echo $image['sizes']['gallery-thumb']; ?>">
 			        </a>
 					
