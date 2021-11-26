@@ -4,7 +4,7 @@ Theme URI: https://www.singularity.is
 Author: Singularity Solution - Djordje, Bojan
 Author URI: https://www.singularity.is
 Description:
-Version: 1.2.1
+Version: 1.2.2
 GitHub Theme URI: BojanSusic/wincasa-template
 GitHub Theme URI: https://github.com/BojanSusic/wincasa-template
 
@@ -1714,7 +1714,6 @@ footer p {
 
 .gallery-block a img {
     width: 100% !important;
-    height: 444px;
 }
 
 .gallery-block a img:hover {
