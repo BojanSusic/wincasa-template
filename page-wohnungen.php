@@ -33,8 +33,7 @@ ob_start();
         <div class="swiper-wrapper">
 			<?php echo do_shortcode("[get_mobile_cards_wohnungen]"); ?>
 			        </div>
-        <!-- Add Pagination -->
-        <div class="swiper-pagination"></div>
+
     </div>
 
     </div>

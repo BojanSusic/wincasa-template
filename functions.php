@@ -508,7 +508,7 @@ function generate_wohnungen_free_table()
     <?php
     if ($empty) {
         ?>
-        <div class="no-free-flats mt-5 white-text pl-0"> Zur Zeit sind alle Wohnungen vermietet. Aktivieren Sie den <a
+        <div id="freieWohnungenTable" class="no-free-flats mt-5 white-text pl-0"> Zur Zeit sind alle Wohnungen vermietet. Aktivieren Sie den <a
                     href="#wincasa-alarm">Wincasa Alarm</a> - so benachrichtigen wir Sie umgehend, sobald in dieser
             Liegenschaft eine Wohnung verfügbar wird.
         </div>
@@ -1332,6 +1332,8 @@ if (count($privateFlatArray) > 0){ ?>
 					</div>
            
                 </div>
+                <!-- Add Pagination -->
+                <div class="swiper-pagination"></div>
                 <?php
 
             }
