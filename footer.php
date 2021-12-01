@@ -2,7 +2,7 @@
 ?>
 
 <?php if(home_url($_SERVER['REQUEST_URI']) !== get_site_url().'/kontakt/'){  ?>
-<div  class="hero2 d-none <?= (get_the_title() == 'Wohnungen') ? "":"mt-5" ?>" id="wincasa-alarm" style="background-image:url(<?= get_field('wincasa_background','options')?>)" name="wincasa-alarm">
+<div  class="hero2 <?= (get_the_title() == 'Wohnungen') ? "":"mt-5" ?>" id="wincasa-alarm" style="background-image:url(<?= get_field('wincasa_background','options')?>)" name="wincasa-alarm">
     <!--<div class="hero-overlay"></div>  -->
     <div class="container ">
         <div class=" d-flex  align-items-center h-100 justify-content-center">
