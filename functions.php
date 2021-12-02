@@ -1693,10 +1693,10 @@ if (function_exists('add_image_size')) {
     add_image_size('news', 1030, 1999, false);
     add_image_size('thumb', 690, 690, false);
     add_image_size('gallery', 1080, 1080, false);
-    add_image_size('gallery-thumb', 526, 444, true); //(cropped)
-    add_image_size('cover', 1352, 538, true); //(cropped)
+    add_image_size('gallery-thumb', 526, 444); //(cropped)
+    add_image_size('cover', 1352, 538); //(cropped)
     add_image_size('cover-mob', 600, 300, true); //(cropped)
-    add_image_size('banner', 1920, 440, true); //(cropped)
+    add_image_size('banner', 1920, 440); //(cropped)
     add_image_size('banner-mob', 600, 440, true); //(cropped)
     add_image_size('swiper', 580, 317, true);
     add_image_size('swiper-mob', 330, 317, true);
