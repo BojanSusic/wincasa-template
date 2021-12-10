@@ -37,7 +37,7 @@
 
 <!-- MAP -->
 <div class="map-block clearfix">
-       <iframe  class="float-left iframe-map" src="<?php echo get_field('map_link','option'); ?>" width="1200" height="450" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
+       <iframe  class="float-left iframe-map d-none" src="<?php echo get_field('map_link','option'); ?>" width="1200" height="450" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
 </div>
 <!-- end  MAP -->
 
