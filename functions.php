@@ -1332,8 +1332,6 @@ if (count($privateFlatArray) > 0){ ?>
 					</div>
            
                 </div>
-                <!-- Add Pagination -->
-                <div class="swiper-pagination"></div>
                 <?php
 
             }
