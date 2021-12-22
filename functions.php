@@ -446,7 +446,7 @@ function generate_wohnungen_free_table()
                     <tr class="vermietet">
                         <td><?php echo $flats['building']['street']; ?></td>
                         <td>
-                            <?php if (!empty($flatPdfUrl)) : ?>
+                            <?php if (!empty($flatPdfUrl) && isset($flats["available"])) : ?>
                                 <a href="<?php echo $flatPdfUrl; ?>" target="_blank"> <img
                                             src="<?php bloginfo('template_directory'); ?>/images/pdf.svg" alt="PDF"
                                             style="width: 24px; margin-left:17px;"></a>
