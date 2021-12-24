@@ -76,7 +76,7 @@ function onug_show_extra_profile_fields($user)
         <tr>
             <th><label for="lang"><?php esc_html_e('Language', 'onug'); ?></label></th>
             <td>
-				<input type="text" id="lang" name="lang" value="<?php echo esc_attr($lang[0]); ?>" class="regular-text">
+                <input type="text" id="lang" name="lang" value="<?php echo esc_attr($lang[0]); ?>" class="regular-text">
             </td>
         </tr>
     </table>
@@ -209,11 +209,11 @@ function send_mails_to_users($changedStatusPrivate, $changedStatusParking, $chan
     $messageDEheader = "<p>Guten Tag<br><br>In der von Ihnen abonnierten Liegenschaft sind neue Objekte verfügbar:</br><br>";
 
     $args = array('role' => 'Subscriber',
-    'meta_key'      =>  'account_status',
-    'meta_value'    =>  'approved');
+        'meta_key'      =>  'account_status',
+        'meta_value'    =>  'approved');
     $users = get_users($args);
     $title = "Wincasa Alarm";
-	
+
     foreach ($users as $user) {
         $messageDEfooter = "<p>Freundliche Grüsse<br><br>Wincasa AG<a href='" . site_url() . "'><br>" . site_url() . "</a></p>
 <br> Wenn Sie den Wincasa Alarm nicht mehr brauchen, können Sie sich hier <a href='".delete_acc_link($user->user_email,$user->ID)."'>abmelden</a>.";
@@ -251,20 +251,21 @@ function generate_de_gewerbe_message($flats)
 {
     $message = '';
     foreach ($flats as $flat) {
+        if(isset($flat["ancillaryCosts"])){
+            $nebenkosten = "<br>Nebenkosten: " . "CHF " . $flat["ancillaryCosts"] . ".-" . "";
+        }else{
+            $nebenkosten = "";
+        }
+        if(isset($flat["netRent"])){
+            $brutto = "<br>Bruttomiete: CHF " . $flat["netRent"] . ".-" ;
+        }else{
+            $brutto = "";
+        }
 
-        if ($flat["type"] != 'PRIVATE') {
-            $type = '';
-            if ($flat["type"] == "OFFICE") {
-                $type = 'Büro';
-            } else if ($flat["type"] == "WAREHOUSE") {
-                $type = 'Warenhaus';
-            }
-            $message .= "<br>Objekttyp: " . $type . "<br>Fäche: " . $flat["size"] . "m&#178;<br>Stockwerk: " . $flat["floor"] . "<br>Bruttomiete: CHF " . $flat["netRent"] . ".-"."
-<br>Nebenkosten: " . "CHF " . $flat["ancillaryCosts"] . ".-" . "
+        $message .= "<br>Objekttyp: " . setObjektArt($flat['type']) . "<br>Fäche: " . $flat["size"] . "m&#178;<br>Stockwerk: " . $flat["floor"] . $brutto . $nebenkosten ."			
 <br>Adresse: " . $flat["building"]["street"] . "
 <br>Referenznummer: " . $flat["referenceNumber"] . "
 <br><br>";
-        }
     }
     return $message;
 
