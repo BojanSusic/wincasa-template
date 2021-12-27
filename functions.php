@@ -368,6 +368,11 @@ function get_flats_sorted_by_streets()
         for ($k = $j + 1; $k < count($streets); $k++) {
             preg_match('/\w+..(\d+)\w/', str_replace('ü','u',$streets[$j]['name'])."a", $number1);
             preg_match('/\w+..(\d+)\w/', str_replace('ü','u',$streets[$k]['name'])."a", $number2);
+            if($number1[1] < '10'){
+                $number1[0] = str_replace($number1[1],'0'.$number1[1],$number1[0]);
+            }elseif($number2[1] < '10'){
+                $number2[0] = str_replace($number2[1],'0'.$number2[1],$number2[0]);
+            }
             if ($number1[0] > $number2[0]) {
                 $pom = $streets[$j];
                 $streets[$j] = $streets[$k];
