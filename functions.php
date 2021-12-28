@@ -1698,7 +1698,7 @@ if (function_exists('add_image_size')) {
     add_image_size('gallery', 1080, 1080, false);
     add_image_size('gallery-thumb', 526, 444, true); //(cropped)
     add_image_size('cover', 1352, 540, true); //(cropped)
-    add_image_size('cover-mob', 600, 300, true); //(cropped)
+    add_image_size('cover-mob', 700, 600, true); //(cropped)
     add_image_size('banner', 1920, 440, true); //(cropped)
     add_image_size('banner-mob', 600, 440, true); //(cropped)
     add_image_size('swiper', 580, 317, true);
