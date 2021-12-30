@@ -91,9 +91,7 @@ function addLinks()
     $referenceNumbers = [];
     foreach ($streets as $street) {
         foreach ($street['flats'] as $flats) {
-            if ($flats['type'] == 'PRIVATE') {
                 $referenceNumbers[] = $flats['referenceNumber'];
-            }
         }
 
     }
