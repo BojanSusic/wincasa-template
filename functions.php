@@ -1797,13 +1797,12 @@ add_filter('acf/load_field/name=flat_no', function ($field) {
     foreach ($flatArrays as $flats) {
         $flatArray[] = $flats;
     }
-
     $choices = [];
     foreach ($flatArray as $content) {
-
-        $choices[$content['referenceNumber']] = $content['referenceNumber'];
+        foreach($content as $item){
+            $choices[$item['referenceNumber']] = $item['referenceNumber'];
+        }
     }
-
     $field['choices'] = $choices;
     return $field;
 });
