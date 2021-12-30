@@ -1456,7 +1456,7 @@ function get_mobile_cards_gewerbe()
     $privateFlatArray = [];
     foreach ($flatArrays as $street) {
         foreach ($street['flats'] as $flats) {
-            if ($flats['type'] != 'PRIVATE' && $flats['type'] == "PARKING_SPACE" && isset($flats['available'])) {
+            if ($flats['type'] != 'PRIVATE' && $flats['type'] != "PARKING_SPACE" && isset($flats['available'])) {
                 $privateFlatArray[] = $flats;
             }
         }
