@@ -20,15 +20,47 @@ function removeData()
     }
 
 }
+
 add_action('cache_page', 'cachePage');
 add_action('acf/save_post', 'cachePage');
-function cachePage(){
-    if(file_exists($_SERVER['DOCUMENT_ROOT'].'/cached-wohnungen.html')){
-        unlink($_SERVER['DOCUMENT_ROOT'].'/cached-wohnungen.html');
+function cachePage()
+{
+    $url_headers_gewerbe = @get_headers(get_site_url() . '/gewerbe/');
+    if (file_exists($_SERVER['DOCUMENT_ROOT'] . '/cached-wohnungen.html')) {
+        unlink($_SERVER['DOCUMENT_ROOT'] . '/cached-wohnungen.html');
+    }
+    if (file_exists($_SERVER['DOCUMENT_ROOT'] . '/cached-gewerbe.html')) {
+        unlink($_SERVER['DOCUMENT_ROOT'] . '/cached-gewerbe.html');
+    }
+    if (strpos($url_headers_gewerbe[0], '200')) {
+        $curl = curl_init();
+
+        curl_setopt_array($curl, array(
+            CURLOPT_URL => get_site_url() . '/gewerbe/',
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING => '',
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_TIMEOUT => 0,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => 'GET',
+            CURLOPT_POSTFIELDS => '{
+    "device": "desktop"
+}',
+            CURLOPT_HTTPHEADER => array(
+                'Authorization: Bearer bb6d5a81b31fd1b5daa22a345f9c11f07280a29e',
+                'Content-Type: application/json'
+            ),
+        ));
+
+        $response = curl_exec($curl);
+
+        curl_close($curl);
+        echo $response;
     }
     $curl = curl_init();
     curl_setopt_array($curl, array(
-        CURLOPT_URL => get_site_url().'/wohnungen/',
+        CURLOPT_URL => get_site_url() . '/wohnungen/',
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_ENCODING => '',
         CURLOPT_MAXREDIRS => 10,
@@ -36,7 +68,7 @@ function cachePage(){
         CURLOPT_FOLLOWLOCATION => true,
         CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
         CURLOPT_CUSTOMREQUEST => 'GET',
-        CURLOPT_POSTFIELDS =>'{
+        CURLOPT_POSTFIELDS => '{
 		"device": "desktop"
 	}',
         CURLOPT_HTTPHEADER => array(
@@ -46,10 +78,11 @@ function cachePage(){
     ));
     $response = curl_exec($curl);
     curl_close($curl);
-    do_action( 'litespeed_purge_all' );
+    do_action('litespeed_purge_all');
 
 }
-add_action('add_links','addLinks');
+
+add_action('add_links', 'addLinks');
 function addLinks()
 {
 
@@ -58,9 +91,9 @@ function addLinks()
     $referenceNumbers = [];
     foreach ($streets as $street) {
         foreach ($street['flats'] as $flats) {
-			 if ($flats['type'] == 'PRIVATE' ) {
-            $referenceNumbers[] = $flats['referenceNumber'];
-			 }
+            if ($flats['type'] == 'PRIVATE') {
+                $referenceNumbers[] = $flats['referenceNumber'];
+            }
         }
 
     }
@@ -109,7 +142,7 @@ function setObjektArt($word)
         "WAREHOUSE" => "Werbefläche",
         "OTHER" => "Andere",
         "MEDICAL_OFFICE" => "Arztpraxis",
-		"GASTRONOMY" =>"Gastronomy"
+        "GASTRONOMY" => "Gastronomy"
     ];
     return $words[$word];
 
@@ -244,17 +277,58 @@ function get_flats()
             $arr = array_merge($arr, get_flat($building["id"], $orgID));
         }
     }
-   $spaces = array_filter(
-    $arr,
-    function ($items) {
-		if ($items['type'] == "PRIVATE") {
-					
-					 return $items;
-				 }
-       
-    },);	
-    return $flats = $spaces;
+    return $flats = get_flats_by_type(get_field('types', 'option'), $arr);
 
+}
+
+function get_flats_by_type($types, $arr)
+{
+    $flatsArr = [];
+    $private = 0;
+    $parking = 0;
+    $others = 0;
+    if ($types) {
+        foreach ($types as $type) {
+            if ($type['type'] == "PRIVATE" && $private == 0) {
+                $private++;
+                $flatsArr[] = array_filter(
+                    $arr,
+                    function ($items) {
+                        if ($items['type'] == "PRIVATE") {
+
+                            return $items;
+                        }
+
+                    },);
+            }
+            if ($type['type'] == "PARKING_SPACE" && $parking == 0) {
+                $parking++;
+                $flatsArr[] = array_filter(
+                    $arr,
+                    function ($items) {
+                        if ($items['type'] == "PARKING_SPACE") {
+                            return $items;
+                        }
+
+                    },);
+            }
+            if ($type['type'] == "OTHERS" && $others == 0) {
+                $others++;
+                $flatsArr[] = array_filter(
+                    $arr,
+                    function ($items) {
+                        if ($items['type'] != "PARKING_SPACE" && $items['type'] != "PRIVATE") {
+
+                            return $items;
+                        }
+
+                    },);
+            }
+        }
+        return $flatsArr;
+    } else {
+        return $arr;
+    }
 }
 
 function sort_flats($building)
@@ -366,12 +440,12 @@ function get_flats_sorted_by_streets()
 
     for ($j = 0; $j < count($streets); $j++) {
         for ($k = $j + 1; $k < count($streets); $k++) {
-            preg_match('/\w+..(\d+)\w/', str_replace('ü','u',$streets[$j]['name'])."a", $number1);
-            preg_match('/\w+..(\d+)\w/', str_replace('ü','u',$streets[$k]['name'])."a", $number2);
-            if($number1[1] < '10'){
-                $number1[0] = str_replace($number1[1],'0'.$number1[1],$number1[0]);
-            }elseif($number2[1] < '10'){
-                $number2[0] = str_replace($number2[1],'0'.$number2[1],$number2[0]);
+            preg_match('/\w+..(\d+)\w/', str_replace('ü', 'u', $streets[$j]['name']) . "a", $number1);
+            preg_match('/\w+..(\d+)\w/', str_replace('ü', 'u', $streets[$k]['name']) . "a", $number2);
+            if ($number1[1] < '10') {
+                $number1[0] = str_replace($number1[1], '0' . $number1[1], $number1[0]);
+            } elseif ($number2[1] < '10') {
+                $number2[0] = str_replace($number2[1], '0' . $number2[1], $number2[0]);
             }
             if ($number1[0] > $number2[0]) {
                 $pom = $streets[$j];
@@ -411,7 +485,7 @@ function generate_wohnungen_free_table()
     $counter = 1;
     if ($empty != true):
         ?>
-       <!-- <h4 class="mt-5 red-text text-center wohnungen-heading">Freie Wohnungen im Überblick</h4>-->
+        <!-- <h4 class="mt-5 red-text text-center wohnungen-heading">Freie Wohnungen im Überblick</h4>-->
         <table class="table table-striped mb-0" id="freieWohnungenTable">
         <thead>
         <tr>
@@ -513,7 +587,8 @@ function generate_wohnungen_free_table()
     <?php
     if ($empty) {
         ?>
-        <div id="freieWohnungenTable" class="no-free-flats mt-5 white-text pl-0"> Zur Zeit sind alle Wohnungen vermietet. Aktivieren Sie den <a
+        <div id="freieWohnungenTable" class="no-free-flats mt-5 white-text pl-0"> Zur Zeit sind alle Wohnungen
+            vermietet. Aktivieren Sie den <a
                     href="#wincasa-alarm">Wincasa Alarm</a> - so benachrichtigen wir Sie umgehend, sobald in dieser
             Liegenschaft eine Wohnung verfügbar wird.
         </div>
@@ -538,13 +613,13 @@ function generate_wohnungen_all_table()
                                     type="button" data-toggle="collapse" data-target="#collapse-<?php echo $counter; ?>"
                                     aria-expanded="true"
                                     aria-controls="collapse-<?php echo $counter; ?>">
-								<div class="d-flex align-items-center"> 
-									<div class="accordion-circle mr-4">
-										<span class="horisontal-line"></span>
-										<span class="vertical-line"></span>
-									</div>
-									<div class="card-heading"><?php echo $street['name'] ?></div>
-								</div>
+                                <div class="d-flex align-items-center">
+                                    <div class="accordion-circle mr-4">
+                                        <span class="horisontal-line"></span>
+                                        <span class="vertical-line"></span>
+                                    </div>
+                                    <div class="card-heading"><?php echo $street['name'] ?></div>
+                                </div>
                             </button>
                         </h2>
                     </div>
@@ -646,7 +721,7 @@ function generate_wohnungen_all_table()
         }
         $counter++;
     }
-   get_popups();
+    get_popups();
 }
 
 function generate_gewerbe_free_table()
@@ -656,7 +731,7 @@ function generate_gewerbe_free_table()
     $streets = get_flats_sorted_by_streets();
     foreach ($streets as $street) {
         foreach ($street['flats'] as $flats) {
-            if ($flats['type'] !== 'PRIVATE' && $flats['type'] != 'PARKING_SPACE' && isset($flats['available'])) {
+            if ($flats['type'] != "PRIVATE" && $flats['type'] != "PARKING_SPACE" && isset($flats['available'])) {
                 $empty = false;
                 break;
             }
@@ -665,112 +740,123 @@ function generate_gewerbe_free_table()
     $counter = 1;
     if ($empty != true):
         ?>
-        <h4 class="mt-5 red-text text-center">Freie Gewerbeflächen im Überblick</h4>
-        <table class="table table-striped" id="freieWohnungenTable">
-        <thead>
-        <tr>
-            <th>Adresse</th>
-            <th>Grundriss</th>
-            <th>Bilder</th>
-            <th>Objekt-Nr.</th>
-            <th>Objekt-Art</th>
-            <th>Geschoss</th>
-            <th>Zimmer</th>
-            <th>Fläche</th>
-            <th>Miete Netto/Mt.</th>
-            <th>+ NK/Mt.</th>
-            <th>Status</th>
-            <th style='text-align:center;'>Bewerben</th>
-        </tr>
-        </thead>
-        <tbody>
+        <!-- <h4 class="mt-5 red-text text-center wohnungen-heading">Freie Wohnungen im Überblick</h4>-->
+        <div id="freieWohnungenTable">
+            <?php foreach ($streets as $street) { ?>
+                <?php if (check_offices($street['flats'])): ?>
+                    <div class="free-flats-container">
+                        <h2 class="my-0"><?php echo $street['name'] ?></h2>
+                        <table class="table table-striped mb-0">
+                            <thead>
+                            <tr>
+                                <th>Grundriss</th>
+                                <th>Bilder</th>
+                                <th>Objekt-Nr.</th>
+                                <th>Objekt-Art</th>
+                                <th>Geschoss</th>
+                                <th>Zimmer</th>
+                                <th>Fläche</th>
+                                <th>Miete Netto/Mt.</th>
+                                <th>+ NK/Mt.</th>
+                                <th>Status</th>
+                                <th style='text-align:center;'>Bewerben</th>
+                            </tr>
+                            </thead>
+                            <tbody>
 
-    <?php endif;
+                            <?php
+                            foreach ($street['flats'] as $flats) {
+                                if ($flats['type'] != "PRIVATE" && $flats['type'] != "PARKING_SPACE" && isset($flats['available'])) {
+                                    $empty = false;
+                                    ?>
+                                    <?php
+                                    if ($flats['type'] != "PRIVATE" && $flats['type'] != "PARKING_SPACE") {
+                                        ?>
 
-    foreach ($streets as $street) {
-        foreach ($street['flats'] as $flats) {
-            if ($flats["type"] !== "PRIVATE" && $flats['type'] != 'PARKING_SPACE' && isset($flats['available'])) {
-                $empty = false;
-                ?>
+                                        <?php
+                                        $flatInfo = get_flat_info($flats['referenceNumber']);
+                                        $flatPdfUrl = $flatInfo[0];
+                                        $flatPhotos = $flatInfo[1];
+                                        ?>
+                                        <tr class="vermietet">
+                                            <td>
+                                                <?php if (!empty($flatPdfUrl)) : ?>
+                                                    <a href="<?php echo $flatPdfUrl; ?>" target="_blank"> <img
+                                                                src="<?php bloginfo('template_directory'); ?>/images/pdf.svg"
+                                                                alt="PDF"
+                                                                style="width: 24px; margin-left:17px;"></a>
+                                                <?php endif; ?>
+                                            </td>
+                                            <td>
+                                                <?php if (!empty($flatPhotos)) : ?>
+                                                    <a id="modal" href="#" data-toggle="modal"
+                                                       data-number="<?php echo $flats["referenceNumber"] ?>"
+                                                       data-target="#modal-<?php echo $flats['id']; ?>">
+                                                        <img src="<?php bloginfo('template_directory'); ?>/images/gallery.svg"
+                                                             alt=""
+                                                             style="width: 24px;">
+                                                    </a>
+                                                <?php endif; ?>
+                                            </td>
+                                            <td>  <?php echo $flats["referenceNumber"] ?></td>
+                                            <td><?= setObjektArt($flats['type']); ?>
+                                            </td>
+                                            <td><?php if ($flats['floor'] == 'EG') {
+                                                    echo 'EG';
+                                                } elseif ($flats['floor'] >= 1) {
+                                                    echo $flats['floor'];
+                                                    echo '. Stock';
+                                                } else {
+                                                    echo $flats['floor'];
+                                                }
+                                                ?></td>
+                                            <td><?php if (isset($flats["numberOfRooms"])) {
+                                                    echo $flats["numberOfRooms"];
+                                                } else {
+                                                    echo "-";
+                                                } ?></td>
+                                            <td class="right"><?php if (isset($flats["size"])) {
+                                                    echo $flats["size"] . "m&#178;";
+                                                } ?></td>
+                                            <td><span class="anzeige"><?php if (isset($flats["netRent"])) {
+                                                        echo "CHF  $flats[netRent].-";
+                                                    } ?></span></td>
+                                            <td><span class="anzeige"><?php if (isset($flats["ancillaryCosts"])) {
+                                                        echo "CHF $flats[ancillaryCosts].-";
+                                                    } ?></span></td>
+                                            <td><?php if (isset($flats["available"])) {
+                                                    echo 'Frei';
+                                                } else {
+                                                    echo 'Vermietet';
+                                                } ?></td>
+                                            <td style='text-align:center;'><?php if (isset($flats['available'])): ?>
+                                                    <a
+                                                            href="https://service.wincasa.ch/Dokumentencenter-Ein-Auszug-Bewerbung_Gewerbe/"
+                                                            class="btn btn-sm bewerbe mb-0"
+                                                            target="_blank">Bewerben</a><?php endif; ?></td>
+                                        </tr>
+
+
+                                    <?php }
+                                }
+
+                            }
+                            $counter++;
+                            ?>
+                            </tbody>
+                        </table>
+                    </div>
+                <?php endif; ?>
                 <?php
-                if ($flats["type"] !== "PRIVATE" && $flats['type'] != 'PARKING_SPACE') {
-                    ?>
-
-                    <?php
-                    $flatInfo = get_flat_info($flats['referenceNumber']);
-                    $flatPdfUrl = $flatInfo[0];
-                    $flatPhotos = $flatInfo[1];
-                    $flatLink = $flatInfo[2];
-                    ?>
-                    <tr class="vermietet">
-                        <td><?php echo $flats['building']['street']; ?></td>
-                        <td>
-                            <?php if (!empty($flatPdfUrl)) : ?>
-                                <a href="<?php echo $flatPdfUrl; ?>" target="_blank"> <img
-                                            src="<?php bloginfo('template_directory'); ?>/images/pdf.svg" alt="PDF"
-                                            style="width: 24px; margin-left:17px;"></a>
-                            <?php endif; ?>
-                        </td>
-                        <td>
-                            <?php if (!empty($flatPhotos)) : ?>
-                                <a id="modal" href="#" data-toggle="modal"
-                                   data-number="<?php echo $flats["referenceNumber"] ?>"
-                                   data-target="#modal-<?php echo $flats['id']; ?>">
-                                    <img src="<?php bloginfo('template_directory'); ?>/images/gallery.svg" alt=""
-                                         style="width: 24px;">
-                                </a>
-                            <?php endif; ?>
-                        </td>
-                        <td>  <?php echo $flats["referenceNumber"] ?></td>
-                        <td><?= setObjektArt($flats['type']); ?>
-                        </td>
-                        <td><?php if ($flats['floor'] == 'EG') {
-                                echo 'Erdgeschoss';
-                            } else if ($flats['floor'] >= 1) {
-                                echo $flats['floor'] . ". Stock";
-                            } else {
-                                echo $flats['floor'];
-                            } ?></td>
-                        <td><?php if (isset($flats["numberOfRooms"])) {
-                                echo '-';
-                            } else {
-                                echo "-";
-                            } ?></td>
-                        <td class="right"><?php if (isset($flats["size"])) {
-                                echo $flats["size"] . "m&#178;";
-                            } ?></td>
-                        <td><span class="anzeige"><?php if (isset($flats["netRent"])) {
-                                    echo "CHF  $flats[netRent].-";
-                                } ?></span></td>
-                        <td><span class="anzeige"><?php if (isset($flats["ancillaryCosts"])) {
-                                    echo "CHF $flats[ancillaryCosts].-";
-                                } ?></span></td>
-                        <td><?php if (isset($flats["available"])) {
-                                echo 'Frei';
-                            } else {
-                                echo 'Vermietet';
-                            } ?></td>
-                        <td style='text-align:center;'><?php if (isset($flats['available'])): ?>    <a
-                                    href="https://service.wincasa.ch/Dokumentencenter-Ein-Auszug-Bewerbung_Gewerbe/"
-                                    class="btn btn-sm btn-light mb-0" target="_blank">Bewerben</a><?php endif; ?></td>
-                    </tr>
-
-
-                <?php }
-            }
-
-        }
-        $counter++;
-    } ?>
-    </tbody>
-    </table>
-
-    <?php
+            } ?>
+        </div>
+    <?php endif;
     if ($empty) {
         ?>
-        <div class="no-free-flats mt-5 white-text">Zur Zeit sind alle Gewerbeflächen vermietet. Aktivieren Sie den <a
+        <div id="freieWohnungenTable" class="no-free-flats mt-5 white-text pl-0"> Zur Zeit sind alle Wohnungen
+            vermietet. Aktivieren Sie den <a
                     href="#wincasa-alarm">Wincasa Alarm</a> - so benachrichtigen wir Sie umgehend, sobald in dieser
-            Liegenschaft Gewerbeflächen wieder verfügbar werden.
+            Liegenschaft eine Wohnung verfügbar wird.
         </div>
         <?php
 
@@ -782,26 +868,30 @@ function generate_gewerbe_all_table()
 {
     $streets = get_flats_sorted_by_streets();
     $counter = 1;
- 	$flats=[];
+    $flats = [];
     foreach ($streets as $street) {
-        foreach($street['flats'] as $flat){
-				 if ($flat['type'] != "PRIVATE"&& $flat['type']!="PARKING_SPACE") {
-					
-					 $flats[] = $flat;
-				 }
-			}
-			if(count($flats) != 0 ){ 
+        foreach ($street['flats'] as $flat) {
+            if ($flat['type'] !== "PRIVATE" && $flat['type'] !== "PARKING_SPACE") {
+                $flats[] = $flat;
+            }
+        }
+        if (count($flats) != 0) {
             ?>
-            <div class="accordion mb-4" id="accordionExample-<?php echo $counter; ?>">
+            <div class="accordion mb-4 " id="accordionExample-<?php echo $counter; ?>">
                 <div class="card no-border">
                     <div class="card-header white-block p-0" id="heading-<?php echo $counter; ?>">
                         <h2 class="mb-0">
-                            <button class="btn btn-link collapsed red-background btn-block text-left d-flex justify-content-between align-items-center"
+                            <button class="btn btn-link collapsed red-background btn-block text-left d-flex justify-content-between align-items-center collapsed"
                                     type="button" data-toggle="collapse" data-target="#collapse-<?php echo $counter; ?>"
                                     aria-expanded="true"
                                     aria-controls="collapse-<?php echo $counter; ?>">
-                                <div class="card-heading"><?php echo $street['name'] ?></div>
-                                <div class="fas collapse-icon-plus"></div>
+                                <div class="d-flex align-items-center">
+                                    <div class="card-heading"><?php echo $street['name'] ?></div>
+                                </div>
+                                <div class="accordion-circle">
+                                    <span class="horisontal-line"></span>
+                                    <span class="vertical-line"></span>
+                                </div>
                             </button>
                         </h2>
                     </div>
@@ -840,7 +930,7 @@ function generate_gewerbe_all_table()
                                                 ?>
                                                 <tr class="vermietet">
                                                     <td>
-                                                        <?php if (!empty($flatPdfUrl)) : ?>
+                                                        <?php if (!empty($flatPdfUrl) && isset($flats["available"])) : ?>
                                                             <a href="<?php echo $flatPdfUrl; ?>" target="_blank"> <img
                                                                         src="<?php bloginfo('template_directory'); ?>/images/pdf.svg"
                                                                         alt="PDF"
@@ -849,8 +939,9 @@ function generate_gewerbe_all_table()
                                                     </td>
                                                     <td>
                                                         <?php if (!empty($flatPhotos)) : ?>
-                                                            <a id="modal" href="#" data-toggle="modal"
+                                                            <a id="modal" href="#"
                                                                data-number="<?php echo $flats["referenceNumber"] ?>"
+                                                               data-toggle="modal"
                                                                data-target="#modal-<?php echo $flats['id']; ?>">
                                                                 <img src="<?php bloginfo('template_directory'); ?>/images/gallery.svg"
                                                                      alt="" style="width: 24px;">
@@ -861,14 +952,16 @@ function generate_gewerbe_all_table()
                                                     <td><?= setObjektArt($flats['type']); ?>
                                                     </td>
                                                     <td><?php if ($flats['floor'] == 'EG') {
-                                                            echo 'Erdgeschoss';
-                                                        } else if ($flats['floor'] >= 1) {
-                                                            echo $flats['floor'] . ". Stock";
+                                                            echo 'EG';
+                                                        } elseif ($flats['floor'] >= 1) {
+                                                            echo $flats['floor'];
+                                                            echo '. Stock';
                                                         } else {
                                                             echo $flats['floor'];
-                                                        } ?></td>
+                                                        }
+                                                        ?></td>
                                                     <td><?php if (isset($flats["numberOfRooms"])) {
-                                                            echo '-';
+                                                            echo $flats["numberOfRooms"];
                                                         } else {
                                                             echo "-";
                                                         } ?></td>
@@ -902,8 +995,9 @@ function generate_gewerbe_all_table()
             <?php
         }
         $counter++;
-		$flats=[];
+        $flats = [];
     }
+    get_popups();
 }
 
 function generate_park_free_table()
@@ -1241,113 +1335,117 @@ function get_mobile_cards_wohnungen()
             }
         }
     }
-if (count($privateFlatArray) > 0){ ?>
-            <?php }
-            foreach ($privateFlatArray as $flat) { ?>
-                <div class="swiper-slide">
-                    <?php
-                    $flatInfo = get_flat_info($flat['referenceNumber']);
-                    $flatPdfUrl = $flatInfo[0];
-                    $flatPhotos = $flatInfo[1];
-                    $flatLink = $flatInfo[2];
-                    ?>
-					
-					<div class="mobile-wohnen-card">
-						<table>
-							<tbody>
-								<tr>
-									<td class="card-title-row bold">Grundriss</td>
-									<td class="card-value-row">
-										<?php if (!empty($flatPdfUrl)) : ?>
-										<a href="<?php echo $flatPdfUrl; ?>" target="_blank"> 
-											<img src="<?php bloginfo('template_directory'); ?>/images/pdf.svg" alt="" style="width: 24px; margin-left:17px">
-										</a>
-										<?php endif; ?>
-									</td>
-								</tr>
-								<tr>
-									<td class="card-title-row bold">Bilder</td>
-									<td class="card-value-row">
-									 	<?php if (!empty($flatPhotos)) : ?>
-                                        <a id="modal" href="#" data-number="<?php echo $flats["referenceNumber"] ?>" data-toggle="modal" data-target="#modal-<?php echo $flats['id']; ?>">
-											<img src="<?php bloginfo('template_directory'); ?>/images/gallery.svg" alt="" style="width: 24px;">
-                                        </a>
-                                        <?php endif; ?>
-									</td>
-								</tr>
-								<tr>
-									<td class="card-title-row bold">Objekt-Nr.</td>
-									<td class="card-value-row"> <?= $flat["referenceNumber"] ?></td>
-								</tr>
-								<tr>
-									<td class="card-title-row bold">Objekt-Art</td>
-									<td class="card-value-row"> <?= setObjektArt($flat['type']); ?></td>
-								</tr>
-								<tr>
-									<td class="card-title-row bold">Geschoss</td>
-									<td class="card-value-row">
-									 <?php if ($flat['floor'] == 'EG') {
-										echo 'Erdgeschoss';
-									} else if ($flat['floor'] >= 1) {
-										echo $flat['floor'] . ". Stock";
-									} else {
-										echo $flat['floor'];
-									} ?>
-									</td>
-								</tr>
-								<tr>
-									<td class="card-title-row bold">Zimmer</td>
-									<td class="card-value-row">
-										<?= $flat['numberOfRooms'] ?>
-									</td>
-								</tr>
-								<tr>
-									<td class="card-title-row bold">Fläche</td>
-									<td class="card-value-row">
-										<?= $flat['floor'] ?>
-									</td>
-								</tr>
-								<tr>
-									<td class="card-title-row bold">Miete Netto/Mt.</td>
-									<td class="card-value-row">
-										<?php echo "CHF " . $flat["netRent"] . ".-" ?>
-									</td>
-								</tr>
-								<tr>
-									<td class="card-title-row bold">+ NK/Mt.</td>
-									<td class="card-value-row">
-										<?php echo "CHF " . $flat["ancillaryCosts"] . ".-" ?>
-									</td>
-								</tr>
-								<tr>
-									<td class="card-title-row bold">Status</td>
-									<td class="card-value-row">
-										<?php
-											if(!empty($flat['available'])):
-										?>
-											<a href="https://www.mywincasa.ch/<?php echo $lang ?>/candidate/<?php echo $flatLink; ?>" class="btn btn-sm bewerbe mb-0">Bewerben </a>	
-										<?php
-											endif;						
-										?>
-									</td>
-								</tr>
-							
-							</tbody>
-						</table>
-					</div>
-           
-                </div>
-                <?php
+    if (count($privateFlatArray) > 0) { ?>
+    <?php }
+    foreach ($privateFlatArray as $flat) { ?>
+        <div class="swiper-slide">
+            <?php
+            $flatInfo = get_flat_info($flat['referenceNumber']);
+            $flatPdfUrl = $flatInfo[0];
+            $flatPhotos = $flatInfo[1];
+            $flatLink = $flatInfo[2];
+            ?>
 
-            }
-            if (count($privateFlatArray) > 0){ ?>
-<?php } else {
-    ?>
-    <div class="no-free-flats mt-5 white-text"> Zur Zeit sind alle Wohnungen vermietet. Aktivieren Sie den <a
-                href="#wincasa-alarm">Wincasa Alarm</a> - so benachrichtigen wir Sie umgehend, sobald in dieser
-        Liegenschaft eine Wohnung verfügbar wird.
-    </div>
-<?php }
+            <div class="mobile-wohnen-card">
+                <table>
+                    <tbody>
+                    <tr>
+                        <td class="card-title-row bold">Grundriss</td>
+                        <td class="card-value-row">
+                            <?php if (!empty($flatPdfUrl)) : ?>
+                                <a href="<?php echo $flatPdfUrl; ?>" target="_blank">
+                                    <img src="<?php bloginfo('template_directory'); ?>/images/pdf.svg" alt=""
+                                         style="width: 24px; margin-left:17px">
+                                </a>
+                            <?php endif; ?>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="card-title-row bold">Bilder</td>
+                        <td class="card-value-row">
+                            <?php if (!empty($flatPhotos)) : ?>
+                                <a id="modal" href="#" data-number="<?php echo $flats["referenceNumber"] ?>"
+                                   data-toggle="modal" data-target="#modal-<?php echo $flats['id']; ?>">
+                                    <img src="<?php bloginfo('template_directory'); ?>/images/gallery.svg" alt=""
+                                         style="width: 24px;">
+                                </a>
+                            <?php endif; ?>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="card-title-row bold">Objekt-Nr.</td>
+                        <td class="card-value-row"> <?= $flat["referenceNumber"] ?></td>
+                    </tr>
+                    <tr>
+                        <td class="card-title-row bold">Objekt-Art</td>
+                        <td class="card-value-row"> <?= setObjektArt($flat['type']); ?></td>
+                    </tr>
+                    <tr>
+                        <td class="card-title-row bold">Geschoss</td>
+                        <td class="card-value-row">
+                            <?php if ($flat['floor'] == 'EG') {
+                                echo 'Erdgeschoss';
+                            } else if ($flat['floor'] >= 1) {
+                                echo $flat['floor'] . ". Stock";
+                            } else {
+                                echo $flat['floor'];
+                            } ?>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="card-title-row bold">Zimmer</td>
+                        <td class="card-value-row">
+                            <?= $flat['numberOfRooms'] ?>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="card-title-row bold">Fläche</td>
+                        <td class="card-value-row">
+                            <?= $flat['floor'] ?>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="card-title-row bold">Miete Netto/Mt.</td>
+                        <td class="card-value-row">
+                            <?php echo "CHF " . $flat["netRent"] . ".-" ?>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="card-title-row bold">+ NK/Mt.</td>
+                        <td class="card-value-row">
+                            <?php echo "CHF " . $flat["ancillaryCosts"] . ".-" ?>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="card-title-row bold">Status</td>
+                        <td class="card-value-row">
+                            <?php
+                            if (!empty($flat['available'])):
+                                ?>
+                                <a href="https://www.mywincasa.ch/<?php echo $lang ?>/candidate/<?php echo $flatLink; ?>"
+                                   class="btn btn-sm bewerbe mb-0">Bewerben </a>
+                            <?php
+                            endif;
+                            ?>
+                        </td>
+                    </tr>
+
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+        <?php
+
+    }
+    if (count($privateFlatArray) > 0) { ?>
+    <?php } else {
+        ?>
+        <div class="no-free-flats mt-5 white-text"> Zur Zeit sind alle Wohnungen vermietet. Aktivieren Sie den <a
+                    href="#wincasa-alarm">Wincasa Alarm</a> - so benachrichtigen wir Sie umgehend, sobald in dieser
+            Liegenschaft eine Wohnung verfügbar wird.
+        </div>
+    <?php }
     return ob_get_clean();
 }
 
@@ -1358,134 +1456,122 @@ function get_mobile_cards_gewerbe()
     $privateFlatArray = [];
     foreach ($flatArrays as $street) {
         foreach ($street['flats'] as $flats) {
-            if ($flats['type'] !== 'PRIVATE' && $flats['type'] !== 'PARKING_SPACE' && isset($flats['available'])) {
+            if ($flats['type'] != 'PRIVATE' && $flats['type'] == "PARKING_SPACE" && isset($flats['available'])) {
                 $privateFlatArray[] = $flats;
             }
         }
     }
-if (count($privateFlatArray) > 0){ ?>
-    <h4 class="mt-5 red-text text-center">Freie Gewerbeflächen im Überblick</h4>
-    <div class="swiper-container mb-5 cards swiper-container-initialized swiper-container-horizontal"
-         id="freieWohnungenSwiper">
-        <div class="swiper-wrapper">
-            <?php }
-            foreach ($privateFlatArray as $flat) { ?>
-                <div class="swiper-slide">
-                    <?php
-                    $flatInfo = get_flat_info($flat['referenceNumber']);
-                    $flatPdfUrl = $flatInfo[0];
-                    $flatPhotos = $flatInfo[1];
-                    $flatLink = $flatInfo[2];
-                    ?>
-                    <div class="header">
-                        <div class="row mb-1">
-                            <div class="col-7 pr-0">
-                                <b><span><?= setObjektArt($flat['type']); ?> </span></b>
-                            </div>
-                            <div class="col-5 text-right">
-                                <b>CHF <span><?php echo $flat["netRent"] . ".-" ?></span></b>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-7 pt-1">
-                                <?php echo $flat["building"]["street"] ?>
-                            </div>
-                            <div class="col-5">
-                                <span><?php echo $flat["size"] ?></span> m&#178;
-                            </div>
-                        </div>
-                    </div>
+    if (count($privateFlatArray) > 0) { ?>
+    <?php }
+    foreach ($privateFlatArray as $flat) { ?>
+        <div class="swiper-slide">
+            <?php
+            $flatInfo = get_flat_info($flat['referenceNumber']);
+            $flatPdfUrl = $flatInfo[0];
+            $flatPhotos = $flatInfo[1];
+            $flatLink = $flatInfo[2];
+            ?>
 
-                    <div class="body">
-                        <div class="row">
-                            <div class="col-6">
-                                <b>Grundriss</b>
-                            </div>
-                            <div class="col-6">
-                                <?php if (!empty($flatPdfUrl)) : ?>
-                                    <a href="<?php echo $flatPdfUrl; ?>" target="_blank"> <img
-                                                src="<?php bloginfo('template_directory'); ?>images/pdf.svg" alt=""
-                                                style="width: 24px; margin-left:17px"></a>
-                                <?php endif; ?>
-                            </div>
-                            <div class="col-6">
-                                <b>Bilder</b>
-                            </div>
-                            <div class="col-6">
-                                <?php if (!empty($flatPhotos)) : ?>
-                                    <a id="modal" href="#" data-toggle="modal"
-                                       data-number="<?php echo $flat["referenceNumber"] ?>"
-                                       data-target="#modal-<?php echo $flat['id']; ?>">
-                                        <img src="<?php bloginfo('template_directory'); ?>/images/gallery.svg" alt=""
-                                             style="width: 24px; margin-left:17px">
-                                    </a>
-                                <?php endif; ?>
-                            </div>
-                            <div class="col-6">
-                                <b>Objekt-Nr.</b>
-                            </div>
-                            <div class="col-6">
-                                <?php echo $flat["referenceNumber"] ?>
-                            </div>
-                            <div class="col-6">
-                                <b>Geschoss</b>
-                            </div>
-                            <div class="col-6">
-                                <?php if ($flat['floor'] == 'EG') {
-                                    echo 'Erdgeschoss';
-                                } else if ($flat['floor'] >= 1) {
-                                    echo $flat['floor'] . ". Stock";
-                                } else {
-                                    echo $flat['floor'];
-                                } ?>
-                            </div>
-                            <div class="col-6">
-                                <b>Miete Netto/Mt.</b>
-                            </div>
-                            <div class="col-6">
-                                <?php echo "CHF " . $flat["netRent"] . ".-" ?>
-                            </div>
-                            <div class="col-6">
-                                <b>+ NK/Mt.</b>
-                            </div>
-                            <div class="col-6">
-                                <?php if (isset($flats["ancillaryCosts"])) {
-                                    echo "CHF $flats[ancillaryCosts].-";
-                                } else {
-                                    echo "-";
-                                } ?>
-                            </div>
-                            <div class="col-6">
-                                <b>Bewerben</b>
-                            </div>
-                            <div class="col-6">
+            <div class="mobile-wohnen-card">
+                <table>
+                    <tbody>
+                    <tr>
+                        <td class="card-title-row bold">Grundriss</td>
+                        <td class="card-value-row">
+                            <?php if (!empty($flatPdfUrl)) : ?>
+                                <a href="<?php echo $flatPdfUrl; ?>" target="_blank">
+                                    <img src="<?php bloginfo('template_directory'); ?>/images/pdf.svg" alt=""
+                                         style="width: 24px; margin-left:17px">
+                                </a>
+                            <?php endif; ?>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="card-title-row bold">Bilder</td>
+                        <td class="card-value-row">
+                            <?php if (!empty($flatPhotos)) : ?>
+                                <a id="modal" href="#" data-number="<?php echo $flats["referenceNumber"] ?>"
+                                   data-toggle="modal" data-target="#modal-<?php echo $flats['id']; ?>">
+                                    <img src="<?php bloginfo('template_directory'); ?>/images/gallery.svg" alt=""
+                                         style="width: 24px;">
+                                </a>
+                            <?php endif; ?>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="card-title-row bold">Objekt-Nr.</td>
+                        <td class="card-value-row"> <?= $flat["referenceNumber"] ?></td>
+                    </tr>
+                    <tr>
+                        <td class="card-title-row bold">Objekt-Art</td>
+                        <td class="card-value-row"> <?= setObjektArt($flat['type']); ?></td>
+                    </tr>
+                    <tr>
+                        <td class="card-title-row bold">Geschoss</td>
+                        <td class="card-value-row">
+                            <?php if ($flat['floor'] == 'EG') {
+                                echo 'Erdgeschoss';
+                            } else if ($flat['floor'] >= 1) {
+                                echo $flat['floor'] . ". Stock";
+                            } else {
+                                echo $flat['floor'];
+                            } ?>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="card-title-row bold">Zimmer</td>
+                        <td class="card-value-row">
+                            <?= $flat['numberOfRooms'] ?>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="card-title-row bold">Fläche</td>
+                        <td class="card-value-row">
+                            <?= $flat['floor'] ?>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="card-title-row bold">Miete Netto/Mt.</td>
+                        <td class="card-value-row">
+                            <?php echo "CHF " . $flat["netRent"] . ".-" ?>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="card-title-row bold">+ NK/Mt.</td>
+                        <td class="card-value-row">
+                            <?php echo "CHF " . $flat["ancillaryCosts"] . ".-" ?>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="card-title-row bold">Status</td>
+                        <td class="card-value-row">
+                            <?php
+                            if (!empty($flat['available'])):
+                                ?>
                                 <a href="https://service.wincasa.ch/Dokumentencenter-Ein-Auszug-Bewerbung_Gewerbe/"
-                                   class="btn btn-sm btn-light mb-0">Bewerben </a>
-                            </div>
-                        </div>
-                    </div>
+                                   class="btn btn-sm bewerbe mb-0">Bewerben </a>
+                            <?php
+                            endif;
+                            ?>
+                        </td>
+                    </tr>
 
-                    <div>
-                    </div>
+                    </tbody>
+                </table>
+            </div>
 
-                </div>
-                <?php
-
-            }
-            if (count($privateFlatArray) > 0){ ?>
         </div>
-        <!-- Add Pagination -->
-        <div class="swiper-pagination"></div>
-    </div>
-    <script src="<?php bloginfo('template_directory'); ?>/js/swiper.min.js" defer></script>
-    <script src="<?php bloginfo('template_directory'); ?>/js/plugin_wincasaobjektliste.js" defer></script>
-<?php } else {
-    ?>
-    <div class="no-free-flats mt-5 white-text"> Zur Zeit sind alle Gewerbeflächen vermietet. Aktivieren Sie den <a
-                href="#wincasa-alarm">Wincasa Alarm</a> - so benachrichtigen wir Sie umgehend, sobald in dieser
-        Liegenschaft Gewerbeflächen wieder verfügbar werden.
-    </div>
-<?php }
+        <?php
+
+    }
+    if (count($privateFlatArray) > 0) { ?>
+    <?php } else {
+        ?>
+        <div class="no-free-flats mt-5 white-text"> Zur Zeit sind alle Wohnungen vermietet. Aktivieren Sie den <a
+                    href="#wincasa-alarm">Wincasa Alarm</a> - so benachrichtigen wir Sie umgehend, sobald in dieser
+            Liegenschaft eine Wohnung verfügbar wird.
+        </div>
+    <?php }
     return ob_get_clean();
 }
 
@@ -1604,65 +1690,66 @@ function create_modal($flat)
 
 function get_popups()
 {
-$streets = get_flats_sorted_by_streets();
-	 foreach ($streets as $street) {
-        foreach($street['flats'] as $flat){
-    $flatInfo = get_flat_info( $flat['referenceNumber']);
-    $flatPdfUrl = $flatInfo[0];
-    $flatPhotos = $flatInfo[1];
-    $flatLink = $flatInfo[2];
+    $streets = get_flats_sorted_by_streets();
+    foreach ($streets as $street) {
+        foreach ($street['flats'] as $flat) {
+            $flatInfo = get_flat_info($flat['referenceNumber']);
+            $flatPdfUrl = $flatInfo[0];
+            $flatPhotos = $flatInfo[1];
+            $flatLink = $flatInfo[2];
 
-    ?>
+            ?>
 
-     <div class="modal fade" id="modal-<?php echo $flat['id']; ?>" tabindex="-1"
-             aria-labelledby="exampleModalLabel" aria-hidden="false">
-            <div class="modal-dialog  modal-lg modal-dialog-centered">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="exampleModalLabel">
-							Objekt-Nr. <?= $flat['referenceNumber'] ?>
-                           </h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
+            <div class="modal fade" id="modal-<?php echo $flat['id']; ?>" tabindex="-1"
+                 aria-labelledby="exampleModalLabel" aria-hidden="false">
+                <div class="modal-dialog  modal-lg modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="exampleModalLabel">
+                                Objekt-Nr. <?= $flat['referenceNumber'] ?>
+                            </h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <div id="carouselControls-<?php echo $flat['id']; ?>" class="carousel slide"
+                                 data-ride="carousel">
+                                <div class="carousel-inner">
+
+                                    <?php $p = 0; ?>
+
+                                    <?php foreach ($flatPhotos as $flatPhoto) : ?>
+                                        <div class="carousel-item <?php if ($p == 0) echo 'active'; ?>">
+                                            <img src="<?= $flatPhoto; ?>" class="d-block w-100" alt="">
+                                        </div>
+                                        <?php $p++; ?>
+                                    <?php endforeach; ?>
+
+                                </div>
+
+                                <?php if ($p > 1) : ?>
+                                    <a class="carousel-control-prev" href="#carouselControls-<?php echo $flat['id']; ?>"
+                                       role="button" data-slide="prev">
+                                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                        <span class="sr-only">Previous</span>
+                                    </a>
+                                    <a class="carousel-control-next" href="#carouselControls-<?php echo $flat['id']; ?>"
+                                       role="button" data-slide="next">
+                                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                        <span class="sr-only">Next</span>
+                                    </a>
+                                <?php endif; ?>
+                            </div>
+                        </div>
                     </div>
-                    <div class="modal-body">
-    <div id="carouselControls-<?php echo $flat['id']; ?>" class="carousel slide"
-         data-ride="carousel">
-        <div class="carousel-inner">
-
-            <?php $p = 0; ?>
-			
-            <?php foreach ($flatPhotos as $flatPhoto) : ?>
-                <div class="carousel-item <?php if ($p == 0) echo 'active'; ?>">
-                    <img src="<?= $flatPhoto; ?>" class="d-block w-100" alt="">
-                </div>
-                <?php $p++; ?>
-            <?php endforeach; ?>
-
-        </div>
-
-        <?php if ($p > 1) : ?>
-            <a class="carousel-control-prev" href="#carouselControls-<?php echo $flat['id']; ?>"
-               role="button" data-slide="prev">
-                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                <span class="sr-only">Previous</span>
-            </a>
-            <a class="carousel-control-next" href="#carouselControls-<?php echo $flat['id']; ?>"
-               role="button" data-slide="next">
-                <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                <span class="sr-only">Next</span>
-            </a>
-        <?php endif; ?>
-    </div> 
-	                   </div>
                 </div>
             </div>
-        </div>					
-	<?php
-		}
-	 }
+            <?php
+        }
+    }
 }
+
 function get_flat_info($flat_number)
 {
     static $flatsInfo = [];
