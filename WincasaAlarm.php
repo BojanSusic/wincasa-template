@@ -56,7 +56,6 @@ if(get_hash_code($email,$_GET['user_id'])==$_GET['hash'])
 */
 
 
-
 /**********Displays on which type of flats user is subscribed (using ACF for user)**********/
 add_action('show_user_profile', 'onug_show_extra_profile_fields');
 add_action('edit_user_profile', 'onug_show_extra_profile_fields');
@@ -138,15 +137,18 @@ function create_table_flat_status()
     require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
     dbDelta($sql);
 }
+
 /***************Deletes all from the flat_status table. Forward true to delete****************/
-function delete_all_from_flat_status_table($delete){
-    if($delete===true){
+function delete_all_from_flat_status_table($delete)
+{
+    if ($delete === true) {
         global $wpdb;
         $flatsFromDB = $wpdb->get_results("DELETE FROM `{$wpdb->base_prefix}flat_status` WHERE 1");
     }
 }
+
 /*****************CRON action******************/
-add_action('send_mails','add_flats');
+add_action('send_mails', 'add_flats');
 /***************Adds flats to database and detect if flat changed status. Sends mail to users********************/
 function add_flats()
 {
@@ -158,39 +160,41 @@ function add_flats()
     $changedStatusGewerbe = [];
     global $wpdb;
     $flatsFromDB = $wpdb->get_results("SELECT * FROM  `{$wpdb->base_prefix}flat_status`");
-    foreach ($flats as $flat) {
-        foreach ($flatsFromDB as $flatFromDB) {
-            if ($flat['referenceNumber'] == $flatFromDB->flat_no) {
-                $founded = true;
-                $status = isset($flat['available']) ? "free" : "taken";
-                if ($flatFromDB->status != $status) {
-                    $wpdb->update("{$wpdb->base_prefix}flat_status", ['status' => $status], ['flat_no' => $flat['referenceNumber']]);
-                    if ($status == "free") {
-                        if ($flat['type'] == "PRIVATE") {
-                            $changedStatusPrivate[] = $flat;
-                        } else if ($flat['type'] == "PARKING_SPACE") {
-                            $changedStatusParking[] = $flat;
-                        } else {
-                            $changedStatusGewerbe[] = $flat;
+    foreach ($flats as $item) {
+        foreach ($item as $flat) {
+            foreach ($flatsFromDB as $flatFromDB) {
+                if ($flat['referenceNumber'] == $flatFromDB->flat_no) {
+                    $founded = true;
+                    $status = isset($flat['available']) ? "free" : "taken";
+                    if ($flatFromDB->status != $status) {
+                        $wpdb->update("{$wpdb->base_prefix}flat_status", ['status' => $status], ['flat_no' => $flat['referenceNumber']]);
+                        if ($status == "free") {
+                            if ($flat['type'] == "PRIVATE") {
+                                $changedStatusPrivate[] = $flat;
+                            } else if ($flat['type'] == "PARKING_SPACE") {
+                                $changedStatusParking[] = $flat;
+                            } else {
+                                $changedStatusGewerbe[] = $flat;
+                            }
                         }
                     }
                 }
             }
-        }
-        if (!$founded) {
-            $private = $flat['type'];
-            $data = array(
-                'flat_no' => $flat['referenceNumber'],
-                'status' => isset($flat['available']) ? "free" : "taken",
-                'time' => date("d/m/y h:m"),
-                'private' => $private
-            );
-            global $wpdb;
-            $wpdb->insert("{$wpdb->base_prefix}flat_status", $data);
-        }
+            if (!$founded) {
+                $private = $flat['type'];
+                $data = array(
+                    'flat_no' => $flat['referenceNumber'],
+                    'status' => isset($flat['available']) ? "free" : "taken",
+                    'time' => date("d/m/y h:m"),
+                    'private' => $private
+                );
+                global $wpdb;
+                $wpdb->insert("{$wpdb->base_prefix}flat_status", $data);
+            }
 
+        }
     }
-    do_action( 'litespeed_purge_all' );
+    do_action('litespeed_purge_all');
     if (count($changedStatusPrivate) != 0 || count($changedStatusParking) != 0 || count($changedStatusGewerbe) != 0) {
         send_mails_to_users($changedStatusPrivate, $changedStatusParking, $changedStatusGewerbe);
     }
@@ -209,21 +213,20 @@ function send_mails_to_users($changedStatusPrivate, $changedStatusParking, $chan
     $messageDEheader = "<p>Guten Tag<br><br>In der von Ihnen abonnierten Liegenschaft sind neue Objekte verfügbar:</br><br>";
 
     $args = array('role' => 'Subscriber',
-        'meta_key'      =>  'account_status',
-        'meta_value'    =>  'approved');
+        'meta_key' => 'account_status',
+        'meta_value' => 'approved');
     $users = get_users($args);
     $title = "Wincasa Alarm";
 
     foreach ($users as $user) {
         $messageDEfooter = "<p>Freundliche Grüsse<br><br>Wincasa AG<a href='" . site_url() . "'><br>" . site_url() . "</a></p>
-<br> Wenn Sie den Wincasa Alarm nicht mehr brauchen, können Sie sich hier <a href='".delete_acc_link($user->user_email,$user->ID)."'>abmelden</a>.";
+<br> Wenn Sie den Wincasa Alarm nicht mehr brauchen, können Sie sich hier <a href='" . delete_acc_link($user->user_email, $user->ID) . "'>abmelden</a>.";
         $private = get_the_author_meta('private', $user->ID);
         //$lang = get_the_author_meta( 'lang', $user->ID );
-        if ($private[0] != "Alle" && count($messages[$private[0]])!=0) {
+        if ($private[0] != "Alle" && count($messages[$private[0]]) != 0) {
             $message = $messageDEheader . $messages[$private[0]] . $messageDEfooter;
             wp_mail($user->user_email, $title, $message, $headers);
-        }
-        else if($private[0]=="Alle" || $private[0]=="") {
+        } else if ($private[0] == "Alle" || $private[0] == "") {
             $message = $messageDEheader . $messages['Wohnungen'] . $messages['Gewerbe'] . $messages['Parkplätze'] . $messageDEfooter;
             wp_mail($user->user_email, $title, $message, $headers);
         }
@@ -251,18 +254,18 @@ function generate_de_gewerbe_message($flats)
 {
     $message = '';
     foreach ($flats as $flat) {
-        if(isset($flat["ancillaryCosts"])){
+        if (isset($flat["ancillaryCosts"])) {
             $nebenkosten = "<br>Nebenkosten: " . "CHF " . $flat["ancillaryCosts"] . ".-" . "";
-        }else{
+        } else {
             $nebenkosten = "";
         }
-        if(isset($flat["netRent"])){
-            $brutto = "<br>Bruttomiete: CHF " . $flat["netRent"] . ".-" ;
-        }else{
+        if (isset($flat["netRent"])) {
+            $brutto = "<br>Bruttomiete: CHF " . $flat["netRent"] . ".-";
+        } else {
             $brutto = "";
         }
 
-        $message .= "<br>Objekttyp: " . setObjektArt($flat['type']) . "<br>Fäche: " . $flat["size"] . "m&#178;<br>Stockwerk: " . $flat["floor"] . $brutto . $nebenkosten ."			
+        $message .= "<br>Objekttyp: " . setObjektArt($flat['type']) . "<br>Fäche: " . $flat["size"] . "m&#178;<br>Stockwerk: " . $flat["floor"] . $brutto . $nebenkosten . "			
 <br>Adresse: " . $flat["building"]["street"] . "
 <br>Referenznummer: " . $flat["referenceNumber"] . "
 <br><br>";
@@ -276,7 +279,7 @@ function generate_de_parking_message($flats)
     $message = '';
     foreach ($flats as $flat) {
         if ($flat["type"] == 'PARKING_SPACE') {
-            $message .= "<br>Objekttyp: Parkplätze" . "<br>Fäche: " . $flat["size"] . "m&#178;<br>Stockwerk: " . $flat["floor"] . "<br>Bruttomiete: CHF " . $flat["netRent"] .".-" . "
+            $message .= "<br>Objekttyp: Parkplätze" . "<br>Fäche: " . $flat["size"] . "m&#178;<br>Stockwerk: " . $flat["floor"] . "<br>Bruttomiete: CHF " . $flat["netRent"] . ".-" . "
 <br>Nebenkosten: " . "CHF " . $flat["ancillaryCosts"] . ".-" . "
 <br>Adresse: " . $flat["building"]["street"] . "
 <br>Referenznummer: " . $flat["referenceNumber"] . "
@@ -284,8 +287,10 @@ function generate_de_parking_message($flats)
         }
     }
 }
+
 /**********CRON action for deleting users with unconfirmed mail*************/
-add_action('delete_inactive_users','delete_inactive_users');
-function delete_inactive_users(){
+add_action('delete_inactive_users', 'delete_inactive_users');
+function delete_inactive_users()
+{
     //TODO implement...
 }
