@@ -91,7 +91,7 @@ function addLinks()
     $referenceNumbers = [];
     foreach ($streets as $street) {
         foreach ($street['flats'] as $flats) {
-                $referenceNumbers[] = $flats['referenceNumber'];
+            $referenceNumbers[] = $flats['referenceNumber'];
         }
 
     }
@@ -435,14 +435,15 @@ function get_flats_sorted_by_streets()
             $streets[] = ['name' => $names, 'flats' => $sortedFlats];
         }
     }
-
     for ($j = 0; $j < count($streets); $j++) {
         for ($k = $j + 1; $k < count($streets); $k++) {
-            preg_match('/\w+..(\d+)\w/', str_replace('ü', 'u', $streets[$j]['name']) . "a", $number1);
-            preg_match('/\w+..(\d+)\w/', str_replace('ü', 'u', $streets[$k]['name']) . "a", $number2);
+            preg_match('/\w+.(\d+)\w/', str_replace('.', '', str_replace('ü', 'u', $streets[$j]['name'])) . "a", $number1);
+            preg_match('/\w+.(\d+)\w/', str_replace('.', '', str_replace('ü', 'u', $streets[$k]['name'])) . "a", $number2);
             if ($number1[1] < '10') {
+
                 $number1[0] = str_replace($number1[1], '0' . $number1[1], $number1[0]);
-            } elseif ($number2[1] < '10') {
+            }
+            if ($number2[1] < '10') {
                 $number2[0] = str_replace($number2[1], '0' . $number2[1], $number2[0]);
             }
             if ($number1[0] > $number2[0]) {
@@ -1799,7 +1800,7 @@ add_filter('acf/load_field/name=flat_no', function ($field) {
     }
     $choices = [];
     foreach ($flatArray as $content) {
-        foreach($content as $item){
+        foreach ($content as $item) {
             $choices[$item['referenceNumber']] = $item['referenceNumber'];
         }
     }
