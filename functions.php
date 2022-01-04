@@ -1421,7 +1421,9 @@ function get_mobile_cards_wohnungen()
                     <tr>
                         <td class="card-title-row bold">Fläche</td>
                         <td class="card-value-row">
-                            <?= $flat['floor'] ?>
+                            <?php if (isset($flat["size"])) {
+                                echo $flat["size"] . "m&#178;";
+                            } ?>
                         </td>
                     </tr>
                     <tr>
@@ -1548,7 +1550,9 @@ function get_mobile_cards_gewerbe()
                     <tr>
                         <td class="card-title-row bold">Fläche</td>
                         <td class="card-value-row">
-                            <?= $flat['floor'] ?>
+                            <?php if (isset($flat["size"])) {
+                                echo $flat["size"] . "m&#178;";
+                            } ?>
                         </td>
                     </tr>
                     <tr>
