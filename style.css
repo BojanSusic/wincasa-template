@@ -4,7 +4,7 @@ Theme URI: https://www.singularity.is
 Author: Singularity Solution - Djordje, Bojan
 Author URI: https://www.singularity.is
 Description:
-Version: 1.4.6
+Version: 1.4.7
 GitHub Theme URI: BojanSusic/wincasa-template
 GitHub Theme URI: https://github.com/BojanSusic/wincasa-template
 
@@ -98,6 +98,11 @@ table, td, th {
 }
 .gallery a{
     padding: 9px;
+}
+.mobile-wohnen-card {
+    border: 1px solid black;
+    border-radius: 10px;
+    overflow: hidden;
 }
 .table-striped tbody tr:nth-of-type(odd) {
     background: #e6e9ed;

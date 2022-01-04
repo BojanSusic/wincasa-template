@@ -91,7 +91,27 @@ function addLinks()
     $referenceNumbers = [];
     foreach ($streets as $street) {
         foreach ($street['flats'] as $flats) {
-            $referenceNumbers[] = $flats['referenceNumber'];
+            if(get_field('types', 'option')){
+                foreach (get_field('types', 'option') as $type) {
+                    if ($type['type'] == "PRIVATE") {
+                        if($flats['type'] == "PRIVATE"){
+                            $referenceNumbers[] = $flats['referenceNumber'];
+                        }
+                    }
+                    if ($type['type'] == "PARKING_SPACE") {
+                        if($flats['type'] == "PARKING_SPACE"){
+                            $referenceNumbers[] = $flats['referenceNumber'];
+                        }
+                    }
+                    if ($type['type'] == "OTHERS") {
+                        if($flats['type'] != "PARKING_SPACE" && $flats['type'] != "PRIVATE"){
+                            $referenceNumbers[] = $flats['referenceNumber'];
+                        }
+                    }
+                }
+            }else{
+                $referenceNumbers[] = $flats['referenceNumber'];
+            }
         }
 
     }
@@ -285,7 +305,7 @@ function get_flats_by_type($types, $arr)
     $private = 0;
     $parking = 0;
     $others = 0;
-    if ($types) {
+    if (count($types) > 0) {
         foreach ($types as $type) {
             if ($type['type'] == "PRIVATE" && $private == 0) {
                 $private++;
@@ -1346,7 +1366,8 @@ function get_mobile_cards_wohnungen()
             ?>
 
             <div class="mobile-wohnen-card">
-                <table>
+                <h2 class="mb-0 py-4 px-3"><?= $flat['building']['street'] ?></h2>
+                <table class="w-100">
                     <tbody>
                     <tr>
                         <td class="card-title-row bold">Grundriss</td>
@@ -1363,8 +1384,8 @@ function get_mobile_cards_wohnungen()
                         <td class="card-title-row bold">Bilder</td>
                         <td class="card-value-row">
                             <?php if (!empty($flatPhotos)) : ?>
-                                <a id="modal" href="#" data-number="<?php echo $flats["referenceNumber"] ?>"
-                                   data-toggle="modal" data-target="#modal-<?php echo $flats['id']; ?>">
+                                <a id="modal" href="#" data-number="<?php echo $flat["referenceNumber"] ?>"
+                                   data-toggle="modal" data-target="#modal-<?php echo $flat['id']; ?>">
                                     <img src="<?php bloginfo('template_directory'); ?>/images/gallery.svg" alt=""
                                          style="width: 24px;">
                                 </a>
@@ -1472,7 +1493,8 @@ function get_mobile_cards_gewerbe()
             ?>
 
             <div class="mobile-wohnen-card">
-                <table>
+                <h2 class="mb-0 py-4 px-3"><?= $flat['building']['street'] ?></h2>
+                <table class="w-100">
                     <tbody>
                     <tr>
                         <td class="card-title-row bold">Grundriss</td>
