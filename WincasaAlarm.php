@@ -286,6 +286,7 @@ function generate_de_parking_message($flats)
 <br><br>";
         }
     }
+    return $message;
 }
 
 /**********CRON action for deleting users with unconfirmed mail*************/
