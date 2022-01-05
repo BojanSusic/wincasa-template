@@ -4,7 +4,7 @@ Theme URI: https://www.singularity.is
 Author: Singularity Solution - Djordje, Bojan
 Author URI: https://www.singularity.is
 Description:
-Version: 1.4.9
+Version: 1.5.0
 GitHub Theme URI: BojanSusic/wincasa-template
 GitHub Theme URI: https://github.com/BojanSusic/wincasa-template
 
@@ -522,12 +522,7 @@ form label {
 @media (max-width: 460px) {
     .um-field-type_terms_conditions {
         flex-direction: column-reverse !important;
-        padding-left: 3em;
         flex-wrap: wrap-reverse;
-    }
-
-    .um-field-area {
-        justify-content: start !important;
     }
 }
 
