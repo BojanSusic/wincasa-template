@@ -1,5 +1,29 @@
 <?php /* Template Name: Wohnungen */ ?>
 <?php get_header(); ?>
+<?php
+ob_start("minifier");
+function minifier($code)
+{
+    $search = array(
+
+        // Remove whitespaces after tags
+        '/\>[^\S ]+/s',
+
+        // Remove whitespaces before tags
+        '/[^\S ]+\</s',
+
+        // Remove multiple whitespace sequences
+        '/(\s)+/s',
+
+        // Removes comments
+        '/<!--(.|\s)*?-->/'
+    );
+    $replace = array('>', '<', '\\1');
+    $code = preg_replace($search, $replace, $code);
+    return $code;
+}
+
+?>
 <main>
 	<?php
 $url = $_SERVER['REQUEST_URI'];
@@ -61,6 +85,9 @@ ob_end_flush(); // Send the output to the browser
 }
 ?>
 	</main>
+<?php
+ob_end_flush();
+?>
 <!-- start FOOTER -->
 <?php get_footer(); ?>
 <!-- end FOOTER -->
