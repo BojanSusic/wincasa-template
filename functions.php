@@ -1808,7 +1808,7 @@ if (function_exists('add_image_size')) {
     add_image_size('news', 1030, 1999, false);
     add_image_size('thumb', 690, 690, false);
     add_image_size('gallery', 1080, 1080, false);
-    add_image_size('gallery-thumb', 526, 444, true); //(cropped)
+    add_image_size('gallery-thumb', 526, 340, true); //(cropped)
     add_image_size('cover', 1352, 540, true); //(cropped)
     add_image_size('cover-mob', 700, 600, true); //(cropped)
     add_image_size('banner', 1920, 440, true); //(cropped)

@@ -93,8 +93,10 @@ GitHub Theme URI: https://github.com/BojanSusic/wincasa-template
     --wohnen-title: #1B365C;
 }
 
-table, td, th {
-
+.vertiacal-line{
+    border-left: 2px solid rgba(0, 0, 0, 0.2);
+    margin-top: 50px;
+    margin-bottom: 50px;
 }
 .gallery a{
     padding: 9px;
@@ -1910,7 +1912,24 @@ footer p {
     }
 
 }
-
+@media (min-width:780px) and (max-width: 1300px){
+    .contact-cards{
+        width: 100% !important;
+    }
+    .contact-image{
+        width: 100% !important;
+    }
+}
+@media (max-width:780px){
+    .vertiacal-line{
+        border-top: 2px solid rgba(0,0,0,0.2);
+        border-left: none;
+        margin-top: 0;
+        margin-bottom: 0;
+        margin-left: 50px;
+        margin-right: 50px;
+    }
+}
 @media (max-width: 768px) {
     #slider .frame {
         height: 350px !important
