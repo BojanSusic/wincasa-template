@@ -101,7 +101,7 @@ function onug_save_extra_profile_fields($user_id)
 function delete_acc_link($email, $id)
 {
     $hash = get_hash_code($email, $id);
-    $link = get_site_url() . "/loeschen/?user_id=" . $id . "&hash=" . $hash;
+    $link = get_site_url() . "/konto-geloescht/?user_id=" . $id . "&hash=" . $hash;
     return $link;
 }
 

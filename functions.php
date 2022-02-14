@@ -16,7 +16,7 @@ function removeData()
 {
     $flatArray = get_field('flats', 'option');;
     for ($i = 0; $i < count($flatArray); $i++) {
-        delete_row('flats', $i, 'options');
+        delete_row('flats', 1, 'options');
     }
 
 }
