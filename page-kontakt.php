@@ -27,6 +27,7 @@
                             <?= get_field("location") ?>
                         </div>
                     </div>
+                    <div class="vertiacal-line"></div>
                     <div class="contact-card mb-3  mr-3 mr-0 pt-lg-5 p-4">
                         <div class=" m-auto text-center">
                             <img src="<?= get_field("image_phone") ?>">
@@ -35,6 +36,7 @@
                             <?= get_field("phone") ?>
                         </div>
                     </div>
+                    <div class="vertiacal-line"></div>
                     <div class="contact-card pt-lg-5  mr-3 mr-0 p-4">
                         <div class=" m-auto text-center">
                             <img src="<?= get_field("image_mail") ?>">
