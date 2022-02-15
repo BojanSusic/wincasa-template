@@ -606,7 +606,7 @@ function generate_wohnungen_free_table()
     <?php
     if ($empty) {
         ?>
-        <div id="freieWohnungenTable" class="no-free-flats mt-5 white-text pl-0"> Zur Zeit sind alle Wohnungen
+        <div id="freieWohnungenTable" class="no-free-flats white-text pl-0"> Zur Zeit sind alle Wohnungen
             vermietet. Aktivieren Sie den <a
                     href="#wincasa-alarm">Wincasa Alarm</a> - so benachrichtigen wir Sie umgehend, sobald in dieser
             Liegenschaft eine Wohnung verfügbar wird.
@@ -872,7 +872,7 @@ function generate_gewerbe_free_table()
     <?php endif;
     if ($empty) {
         ?>
-        <div id="freieWohnungenTable" class="no-free-flats mt-5 white-text pl-0"> Zur Zeit sind alle Wohnungen
+        <div id="freieWohnungenTable" class="no-free-flats white-text pl-0"> Zur Zeit sind alle Wohnungen
             vermietet. Aktivieren Sie den <a
                     href="#wincasa-alarm">Wincasa Alarm</a> - so benachrichtigen wir Sie umgehend, sobald in dieser
             Liegenschaft eine Wohnung verfügbar wird.
@@ -1116,7 +1116,7 @@ function generate_park_free_table()
     <?php
     if ($empty) {
         ?>
-        <div class="no-free-flats white-text mt-5"> Zur Zeit sind alle Parkplätze vermietet. Aktivieren Sie den <a
+        <div class="no-free-flats white-text"> Zur Zeit sind alle Parkplätze vermietet. Aktivieren Sie den <a
                     href="#wincasa-alarm">Wincasa Alarm</a> - so benachrichtigen wir Sie umgehend, sobald in dieser
             Liegenschaft ein Parkplatz verfügbar wird.
         </div>
@@ -1334,7 +1334,7 @@ if (count($privateFlatArray) > 0){ ?>
     <script src="<?php bloginfo('template_directory'); ?>/js/plugin_wincasaobjektliste.js" defer></script>
 <?php } else {
     ?>
-    <div class="no-free-flats mt-5 white-text"> Zur Zeit sind alle Parkplätze vermietet. Aktivieren Sie den <a
+    <div class="no-free-flats white-text"> Zur Zeit sind alle Parkplätze vermietet. Aktivieren Sie den <a
                 href="#wincasa-alarm">Wincasa Alarm</a> - so benachrichtigen wir Sie umgehend, sobald in dieser
         Liegenschaft ein Parkplatz verfügbar wird.
     </div>
@@ -1463,7 +1463,7 @@ function get_mobile_cards_wohnungen()
     if (count($privateFlatArray) > 0) { ?>
     <?php } else {
         ?>
-        <div class="no-free-flats mt-5 white-text"> Zur Zeit sind alle Wohnungen vermietet. Aktivieren Sie den <a
+        <div class="no-free-flats white-text"> Zur Zeit sind alle Wohnungen vermietet. Aktivieren Sie den <a
                     href="#wincasa-alarm">Wincasa Alarm</a> - so benachrichtigen wir Sie umgehend, sobald in dieser
             Liegenschaft eine Wohnung verfügbar wird.
         </div>
@@ -1592,7 +1592,7 @@ function get_mobile_cards_gewerbe()
     if (count($privateFlatArray) > 0) { ?>
     <?php } else {
         ?>
-        <div class="no-free-flats mt-5 white-text"> Zur Zeit sind alle Wohnungen vermietet. Aktivieren Sie den <a
+        <div class="no-free-flats white-text"> Zur Zeit sind alle Wohnungen vermietet. Aktivieren Sie den <a
                     href="#wincasa-alarm">Wincasa Alarm</a> - so benachrichtigen wir Sie umgehend, sobald in dieser
             Liegenschaft eine Wohnung verfügbar wird.
         </div>
