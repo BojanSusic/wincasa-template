@@ -1427,9 +1427,12 @@ function get_mobile_cards_wohnungen()
                         </td>
                     </tr>
                     <tr>
-                        <td class="card-title-row bold">Miete Netto/Mt.</td>
+                        <td class="card-title-row bold">Miete Brutto/Mt.</td>
                         <td class="card-value-row">
-                            <?php echo "CHF " . $flat["netRent"] . ".-" ?>
+                            <?php if (isset($flat["netRent"]) && isset($flat["ancillaryCosts"])) {
+                                $total = $flats["netRent"] + $flat["ancillaryCosts"];
+                                echo "CHF  $total.-";
+                            } ?>
                         </td>
                     </tr>
                     <tr>
