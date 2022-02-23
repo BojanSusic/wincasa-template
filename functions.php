@@ -1,6 +1,7 @@
 <?php
 require_once('endpoints.php');
-require_once('WincasaAlarm.php');
+require_once( get_stylesheet_directory() . '/WincasaAlarm.php' );
+
 
 function oiw_load_recaptcha_badge_page()
 {
