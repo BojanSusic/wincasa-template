@@ -239,8 +239,9 @@ function generate_de_private_message($flats)
     $message = '';
     foreach ($flats as $flat) {
         if ($flat["type"] == 'PRIVATE') {
+            $total = $flat["netRent"] + $flat["ancillaryCosts"];
             $message .= "<br>Objekttyp: Wohnung" . "<br>Anzahl Zimmer: " . $flat["numberOfRooms"] . "<br>Fläche: " . $flat["size"] . "m&#178;" . "<br>Stockwerk: " . $flat["floor"] . "
-<br>Nettomiete: " . "CHF " . $flat["netRent"] . ".-" . "
+<br>Bruttomiete: " . "CHF " . $total . ".-" . "
 <br>Nebenkosten: " . "CHF " . $flat["ancillaryCosts"] . ".-" . "
 <br>Adresse: " . $flat["building"]["street"] . "
 <br>Referenznummer: " . $flat["referenceNumber"] . "
