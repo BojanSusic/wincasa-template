@@ -1,15 +1,15 @@
 <?php
-$template = get_template_directory().'/WincasaAlarm.php';
 require_once('endpoints.php');
-if (file_exists($template)){
-    require_once('WincasaAlarm.php');
-}else{
-    require_once( get_stylesheet_directory() . '/WincasaAlarm.php' );
-}
 
 
 function oiw_load_recaptcha_badge_page()
 {
+    $template = get_template_directory().'/WincasaAlarm.php';
+    if (file_exists($template)){
+        require_once('WincasaAlarm.php');
+    }else{
+        require_once( get_stylesheet_directory() . '/WincasaAlarm.php' );
+    }
     if (!is_page(array('kontakt'))) {
         wp_dequeue_script('google-recaptcha');
         wp_dequeue_script('wpcf7-recaptcha');
