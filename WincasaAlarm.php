@@ -266,7 +266,7 @@ function generate_de_gewerbe_message($flats)
             $brutto = "";
         }
 
-        $message .= "<br>Objekttyp: " . setObjektArt($flat['type']) . "<br>Fäche: " . $flat["size"] . "m&#178;<br>Stockwerk: " . $flat["floor"] . $brutto . $nebenkosten . "			
+        $message .= "<br>Objekttyp: " . setObjektArt($flat['type']) . "<br>Fläche: " . $flat["size"] . "m&#178;<br>Stockwerk: " . $flat["floor"] . $brutto . $nebenkosten . "			
 <br>Adresse: " . $flat["building"]["street"] . "
 <br>Referenznummer: " . $flat["referenceNumber"] . "
 <br><br>";
@@ -280,7 +280,7 @@ function generate_de_parking_message($flats)
     $message = '';
     foreach ($flats as $flat) {
         if ($flat["type"] == 'PARKING_SPACE') {
-            $message .= "<br>Objekttyp: Parkplätze" . "<br>Fäche: " . $flat["size"] . "m&#178;<br>Stockwerk: " . $flat["floor"] . "<br>Bruttomiete: CHF " . $flat["netRent"] . ".-" . "
+            $message .= "<br>Objekttyp: Parkplätze" . "<br>Fläche: " . $flat["size"] . "m&#178;<br>Stockwerk: " . $flat["floor"] . "<br>Bruttomiete: CHF " . $flat["netRent"] . ".-" . "
 <br>Nebenkosten: " . "CHF " . $flat["ancillaryCosts"] . ".-" . "
 <br>Adresse: " . $flat["building"]["street"] . "
 <br>Referenznummer: " . $flat["referenceNumber"] . "
