@@ -1,8 +1,7 @@
 <?php
 require_once('endpoints.php');
 
-
-function oiw_load_recaptcha_badge_page()
+function wincasa_alarm()
 {
     $template = get_template_directory().'/WincasaAlarm.php';
     if (file_exists($template)){
@@ -10,12 +9,17 @@ function oiw_load_recaptcha_badge_page()
     }else{
         require_once( get_stylesheet_directory() . '/WincasaAlarm.php' );
     }
+}
+
+function oiw_load_recaptcha_badge_page()
+{
     if (!is_page(array('kontakt'))) {
         wp_dequeue_script('google-recaptcha');
         wp_dequeue_script('wpcf7-recaptcha');
     }
 }
 
+add_action( 'init', 'wincasa_alarm' );
 add_action('wp_enqueue_scripts', 'oiw_load_recaptcha_badge_page');
 /**********************API*********************/
 function removeData()
