@@ -135,7 +135,7 @@ function addLinks()
 
         }
         if (!$founded) {
-            $url = "https://api.mywincasa.ch/realestateproperty/id?referenceId=" . $referenceNumber;
+            $url = "https://api.wincasa.ch/tenant-portal/v1/realestateproperty/id?referenceId=" . $referenceNumber;
             $curl = curl_init($url);
             curl_setopt($curl, CURLOPT_URL, $url);
             curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
