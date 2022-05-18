@@ -882,10 +882,10 @@ function generate_gewerbe_free_table()
     <?php endif;
     if ($empty) {
         ?>
-        <div id="freieWohnungenTable" class="no-free-flats white-text pl-0"> Zur Zeit sind alle Wohnungen
+        <div id="freieWohnungenTable" class="no-free-flats white-text pl-0"> Zur Zeit sind alle Gewerbe
             vermietet. Aktivieren Sie den <a
                     href="#wincasa-alarm">Wincasa Alarm</a> - so benachrichtigen wir Sie umgehend, sobald in dieser
-            Liegenschaft eine Wohnung verfügbar wird.
+            Liegenschaft eine Gewerbe verfügbar wird.
         </div>
         <?php
 
